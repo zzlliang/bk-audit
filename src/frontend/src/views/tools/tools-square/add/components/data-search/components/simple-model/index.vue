@@ -205,17 +205,20 @@
                 color: #b8babf;
                 cursor: pointer;
               "
-                type="add-fill" />
+                type="add-fill"
+                @click="handleAddFillClick(index)" />
               <audit-icon
+                v-bk-tooltips="{
+                  content: formData.config.input_variable.length > 1 ? t('删除') : t('至少保留一个'),
+                }"
                 style="
                 margin-left: 4px;
                 font-size: 16px;
                 color: #b8babf;
                 cursor: pointer;
               "
-                type="reduce-fill
-
-" />
+                type="reduce-fill"
+                @click="handleReduceFillClick(index)" />
             </div>
           </div>
         </template>
@@ -283,6 +286,23 @@
   });
   // 前端类型列表选择
   const handleRequiredClick = () => { };
+
+  const handleAddFillClick = (index: number) => {
+    formData.value.config.input_variable.splice(index + 1, 0, {
+      raw_name: '',
+      display_name: '',
+      description: '',
+      required: false,
+      field_category: '',
+      default_value: '',
+      choices: [],
+    });
+  };
+  const handleReduceFillClick = (index: number) => {
+    if (formData.value.config.input_variable.length > 1) {
+      formData.value.config.input_variable.splice(index, 1);
+    }
+  };
 </script>
 <style lang="postcss" scoped>
 .simple-model {

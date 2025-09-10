@@ -132,7 +132,6 @@
                     <bk-button
                       v-for="item in searchTypeList"
                       :key="item.value"
-                      :disabled="item.disabled"
                       :selected="formData.data_search_config_type === item.value"
                       @click="() => formData.data_search_config_type = item.value">
                       {{ item.label }}
@@ -330,7 +329,6 @@
   const searchTypeList = [{
     label: '简易模式',
     value: 'simple',
-    disabled: false,
   }, {
     label: 'SQL模式',
     value: 'sql',
@@ -368,7 +366,7 @@
     tags: [],
     description: '',
     tool_type: 'data_search',
-    data_search_config_type: 'sql',
+    data_search_config_type: 'simple',
     config: {
       referenced_tables: [],
       input_variable: [{

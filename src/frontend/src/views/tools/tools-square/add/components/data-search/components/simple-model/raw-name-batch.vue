@@ -38,7 +38,8 @@
           <div class="list-body">
             <bk-checkbox-group
               v-model="checkboxGroupValue"
-              class="list-item-select">
+              class="list-item-select"
+              @change="handleCheckboxGroupChange">
               <bk-checkbox
                 v-for="(item, index) in dataList"
                 :key="index"
@@ -100,7 +101,8 @@
                       <div
                         v-for="(val, index) in algorithm"
                         :key="index"
-                        class="algorithm-item">
+                        class="algorithm-item"
+                        @click="handleAlgorithmClick(val)">
                         {{ val?.label }}
                       </div>
                     </div>
@@ -202,6 +204,24 @@
       value: 'sum',
       disabled: false,
     },
+    {
+      id: '2',
+      label: 'avg',
+      value: 'avg',
+      disabled: false,
+    },
+    {
+      id: '3',
+      label: 'max',
+      value: 'max',
+      disabled: false,
+    },
+    {
+      id: '4',
+      label: 'min',
+      value: 'min',
+      disabled: false,
+    },
   ]);
   const dataList = ref([
     {
@@ -226,8 +246,27 @@
     selectedValue: '',
   }]);
 
+  const handleCheckboxGroupChange = (val) => {
+    console.log('handleCheckboxGroupChange', val);
+    const data = dataList.value.filter(item => val.includes(item.name));
+    formData.value = data.map(item => ({
+      raw_name: item.value,
+      display_name: item.name,
+      description: item.value,
+      selectedValue: '',
+    }));
+  };
+
+  const handleAlgorithmClick = (val) => {
+    console.log('handleAlgorithmClick', val);
+    formData.value = formData.value.map(item => ({
+      ...item,
+      selectedValue: val.value,
+    }));
+  };
+
   const submit = () => {
-    console.log('submit');
+    console.log('submit', isValue.value, formData.value);
   };
   const cancel = () => {
     console.log('cancel');
@@ -256,7 +295,7 @@
       align-items: center;
 
       .list-head-select {
-        width: 50px;
+        /* width: 50px; */
         text-align: center;
       }
 
@@ -279,12 +318,13 @@
 
       .list-item-select {
         display: flex;
-        width: 250px;
+
+        /* width: 250px; */
         height: 100%;
         flex-direction: column;
 
         :deep(.bk-radio.bk-radio) {
-          margin-left: 20px;
+          /* margin-left: 20px; */
           font-size: 12px;
           color: #4d4f56;
 
@@ -295,9 +335,14 @@
           color: #4d4f56;
         }
 
+        :deep(.bk-checkbox) {
+          margin-left: 0;
+        }
+
         .list-item-radio {
           margin-top: 10px;
-          margin-left: 30px;
+
+          /* margin-left: 30px; */
           font-size: 12px;
           color: #4d4f56;
         }
@@ -305,7 +350,7 @@
 
       .list-item-right {
         display: flex;
-        width: 150px;
+        width: 180px;
         height: 100%;
         text-align: left;
         flex-direction: column;
@@ -379,7 +424,8 @@
 }
 
 .search1 {
-  margin-top: 5px;
+  margin-top: 8px;
+  margin-left: 3px;
   font-size: 20px;
   color: #979ba5;
 }
