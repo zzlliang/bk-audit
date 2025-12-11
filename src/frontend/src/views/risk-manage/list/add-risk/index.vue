@@ -99,6 +99,7 @@
     editData.value = editRef.value?.getEditData();
     isEdit.value = false;
     nextTick(() => {
+      console.log('editData', editData.value);
       previewRef.value?.initData(editData.value);
     });
   };
@@ -117,6 +118,7 @@
       confirmText: t('确认'),
       onConfirm() {
         isShow.value = false;
+        window.changeConfirm = false;
         resolve(true);
       },
       onCancel() {
@@ -147,13 +149,13 @@
     const params = {
       events: [
         {
-          event_content: editData.value.formData.event_content,
+          // event_content: editData.value.formData.event_content,
           strategy_id: editData.value.formData.strategy_id,
           event_data: eventDataParams,
           event_time: convertToTimestamp(editData.value.formData.event_time),
-          event_type: editData.value.formData.event_type,
-          event_source: editData.value.formData.event_source,
-          operator: editData.value.formData.operator.join(','),
+          // event_type: editData.value.formData.event_type,
+          // event_source: editData.value.formData.event_source,
+          // operator: editData.value.formData.operator.join(','),
         },
       ],
       gen_risk: true,

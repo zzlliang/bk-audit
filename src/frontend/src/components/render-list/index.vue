@@ -22,6 +22,7 @@
       <bk-table
         ref="tableRef"
         :border="border"
+        class="render-list"
         v-bind="$attrs"
         :columns="columns"
         :data="listData.results"
@@ -389,3 +390,13 @@
     },
   });
 </script>
+
+<style lang="postcss" scoped>
+  .render-list {
+    :deep(.new-row) {
+      td {
+        background-color: #e4faf0 !important;
+      }
+    }
+  }
+</style>

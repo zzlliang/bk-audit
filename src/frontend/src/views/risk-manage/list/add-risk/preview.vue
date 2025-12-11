@@ -54,12 +54,6 @@
         {{ t('关联事件') }}
       </div>
       <div class="event-list">
-        <div class="event-list-left">
-          <div
-            class="active-event event-time">
-            {{ editData.formData.event_time }}
-          </div>
-        </div>
         <div class="event-list-right">
           <div class="right-info">
             <div class="right-info-title">
@@ -302,28 +296,6 @@
       margin-top: 20px;
       margin-left: 2%;
       background: #fff;
-
-      .event-list-left {
-        width: 144px;
-        margin-left: 10px;
-        background: #f5f7fa;
-        border-radius: 4px;
-
-        .event-time {
-          width: 100%;
-          height: 32px;
-          font-size: 12px;
-          line-height: 32px;
-          color: #4d4f56;
-          text-align: center;
-          cursor: pointer;
-        }
-
-        .active-event {
-          background: #e1ecff;
-          border-left: 3px solid #3a84ff;
-        }
-      }
 
       .event-list-right {
         width: calc(100% - 154px);
