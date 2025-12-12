@@ -24,6 +24,7 @@
             isShowSide ? 'calc(100% - 368px)' : '100%'
           )
         }">
+        <!-- {{ detailData }} -->
         <base-info
           :data="detailData"
           :risk-status-common="riskStatusCommon"
@@ -147,6 +148,7 @@
       }
     },
   });
+
   // 获取策略事件信息
   const {
     data: strategyInfoData,

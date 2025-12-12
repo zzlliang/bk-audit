@@ -39,6 +39,7 @@
         class="audit-highlight-table"
         :columns="tableColumn"
         :data-source="dataSource"
+        :is-row-select-enable="handleSelectEnable"
         :row-class="handleRowClass"
         :settings="settings"
         @clear-search="handleClearSearch"
@@ -106,7 +107,7 @@
   const { getSearchParamsPost } = useUrlSearch();
   const router = useRouter();
   const route = useRoute();
-  // let timeout: number| undefined = undefined;
+  let timeout: number| undefined = undefined;
   const statusToMap: Record<string, {
     tag: string,
     icon: string,
@@ -169,9 +170,11 @@
             riskId: data.risk_id,
           },
         };
-        return <router-link to={to}>
+        return (data.status === 'stand_by'
+          ? <span>{data.risk_id}</span>
+          : (<router-link to={to}>
           <Tooltips data={data.risk_id} />
-        </router-link>;
+        </router-link>));
       },
     },
     {
@@ -215,13 +218,13 @@
     {
       label: () => t('处理状态'),
       field: () => 'status',
-      width: 110,
+      width: 130,
       render: ({ data }: { data: RiskManageModel }) => (
         // eslint-disable-next-line no-nested-ternary
         data.status === 'stand_by' ? (
-           <bk-tag theme='success'>
-            {t('生成中')}
-          </bk-tag>
+           <span style='font-size: 14px;color: #3a84ff;'>
+           <audit-icon  type="loading" style='font-size: 14px;color: #3a84ff; animation: spin 1s linear infinite' />  {t('风险创建中')}
+          </span>
         )
           : (data.status === 'closed' && data.experiences > 0
             ? (
@@ -310,7 +313,11 @@
       label: () => t('操作'),
       width: 148,
       fixed: 'right',
-      render: ({ data }: { data: RiskManageModel }) => <p>
+      render: ({ data }: { data: RiskManageModel }) => (
+        data.status === 'stand_by' ? <div>
+          <bk-button text  class='mr16'>{t('--')}</bk-button>
+        <bk-button text  class='mr16'>{t('--')}</bk-button></div>
+        :     (<p>
         {
           ['for_approve', 'auto_process'].includes(data.status)
             ? (
@@ -351,7 +358,8 @@
                 userInfo={userInfo.value}
                 data={data} />
           }
-          </p>,
+          </p>)
+      ),
     },
   ] as Column[];
 
@@ -372,6 +380,12 @@
     current_operator: 'current_operator',
     // last_operate_time: 'last_operate_time',
     // risk_label: 'risk_label',
+  };
+  const handleSelectEnable = (item: any) => {
+    if (item.row.status === 'stand_by') {
+      return false;
+    }
+    return true;
   };
   const initSettings = () => {
     const fieldNames = selectedItemList.value.map(item => `event_data.${item.field_name}`);
@@ -481,9 +495,19 @@
     // 获取对应风险等级
     fetchRiskLevel({
       strategy_ids: results.map(item => item.strategy_id).join(','),
-    }).then(() => {
-
     });
+    if (results.some(item => item.status === 'stand_by')) {
+      // 执行定时器
+      timeout = setTimeout(() => {
+        listRef.value?.initListData();
+      }, 1000);
+    } else {
+      // 消除定时器
+      if (timeout) {
+        clearTimeout(timeout);
+        timeout = undefined;
+      }
+    }
   };
 
   const  initColumns = () => {
@@ -596,13 +620,18 @@
   const handleAddRiskSuccess = () => {
     searchBoxRef.value.clearValue();
   };
+
+
   onMounted(() => {
     nextTick(() => {
       getEventFields();
     });
   });
   onUnmounted(() => {
-    // clearTimeout(timeout);
+    if (timeout) {
+      clearTimeout(timeout);
+      timeout = undefined;
+    }
   });
 
   onBeforeRouteLeave((to, from, next) => {
@@ -625,6 +654,15 @@
   });
 </script>
 <style lang='postcss'>
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
 
 .risk-manage-list-page-wrap {
   .risk-manage-list {

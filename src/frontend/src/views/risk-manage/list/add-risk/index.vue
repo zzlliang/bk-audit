@@ -99,7 +99,6 @@
     editData.value = editRef.value?.getEditData();
     isEdit.value = false;
     nextTick(() => {
-      console.log('editData', editData.value);
       previewRef.value?.initData(editData.value);
     });
   };
@@ -117,6 +116,7 @@
       cancelText: t('取消'),
       confirmText: t('确认'),
       onConfirm() {
+        isEdit.value = true;
         isShow.value = false;
         window.changeConfirm = false;
         resolve(true);

@@ -1,3 +1,4 @@
+<!-- eslint-disable max-len -->
 <!--
   TencentBlueKing is pleased to support the open source community by making
   蓝鲸智云 - 审计中心 (BlueKing - Audit Center) available.
@@ -33,6 +34,7 @@
     <div class="title">
       <span> {{ t('关联事件') }}</span>
       <span
+        v-if="data.status !== 'closed'"
         class="add-event"
         @click="handleAddEvent">
         <audit-icon
@@ -66,9 +68,12 @@
         </div>
 
         <!-- detail -->
-        <div v-if="activeStatus === 'new'">
+        <div v-if="activeStatus === 'new' && newIndex.includes(active)">
           <div class="frontend-create">
-            {{ t('事件生成中') }}
+            <audit-icon
+              class="create-icon"
+              type="loading" />
+            {{ t('事件创建中') }}
           </div>
         </div>
         <div
@@ -129,7 +134,7 @@
                             drillMap.get(basicItem.field_name),
                             basicItem.field_name
                           )">
-                          {{ displayValueDict[basicItem.field_name as DisplayValueKeysWithoutEventData]?.value }}
+                          {{ handleShowText(displayValueDict[basicItem.field_name as DisplayValueKeysWithoutEventData]?.value ) }}
                         </span>
                         <template #content>
                           <div>
@@ -165,7 +170,7 @@
                       </bk-popover>
                       <!-- 没有字段映射或者没有证据下探 -->
                       <span v-else>
-                        {{ displayValueDict[basicItem.field_name as DisplayValueKeysWithoutEventData]?.value }}
+                        {{ handleShowText(displayValueDict[basicItem.field_name as DisplayValueKeysWithoutEventData]?.value) }}
                       </span>
                     </template>
                     <!-- 证据下探按钮 -->
@@ -263,7 +268,7 @@
                           drillMap.get(key),
                           key
                         )">
-                        {{ displayValueDict.eventData[key]?.value }}
+                        {{ handleShowText(displayValueDict.eventData[key]?.value) }}
                       </span>
                       <template #content>
                         <div>
@@ -276,7 +281,7 @@
                             <br>
                             <span>{{ t('展示文本: ') }}</span>
                             <span>
-                              {{ displayValueDict.eventData[key]?.dict?.name }}
+                              {{ handleShowText(displayValueDict.eventData[key]?.dict?.name) }}
                             </span>
                           </div>
                           <div
@@ -289,7 +294,7 @@
                     </bk-popover>
                     <!-- 没有字段映射或者没有证据下探 -->
                     <span v-else>
-                      {{ displayValueDict.eventData[key]?.value }}
+                      {{ handleShowText(displayValueDict.eventData[key]?.value) }}
                     </span>
                     <!-- 证据下探按钮 -->
                     <template v-if="drillMap.get(key)">
@@ -606,8 +611,10 @@
   const props = defineProps<Props>();
   const emits = defineEmits<Emits>();
   const isShowSide = ref(false);
+  let timeout: number| undefined = undefined;
 
   const activeStatus = ref('');
+  const newIndex = ref<number[]>([]);
   const addEventRef = ref();
   const router = useRouter();
   const { t, locale } = useI18n();
@@ -736,6 +743,28 @@
     return eventInfo.filter(item => item.duplicate_field).map(item => item.field_name);
   });
 
+  // 判断值是否为数组（包括字符串形式的数组）
+  const handleShowText = (value: any) => {
+    // 1. 如果是真正的数组，直接连接
+    if (Array.isArray(value)) {
+      return value.length > 0 ? value.join(',') : '--';
+    }
+
+    // 2. 如果是字符串且看起来像数组，尝试解析
+    if (typeof value === 'string' && value.trim().startsWith('[') && value.trim().endsWith(']')) {
+      try {
+        const parsedArray = JSON.parse(value);
+        if (Array.isArray(parsedArray)) {
+          return parsedArray.length > 0 ? parsedArray.join(',') : '--';
+        }
+      } catch (error) {
+        return value  || '--';
+      }
+    }
+    // 3. 其他情况直接返回原值
+    return value || '--';
+  };
+
   // 将各种类型转换为字符串，模拟 Vue 模板的显示效果
   const convertToString = (value: any): string => {
     // Vue 模板显示逻辑：
@@ -829,6 +858,8 @@
         id: props.data.risk_id,
       }).then(() => {
         // 触底加载，拼接 - 使用动态去重字段
+        linkEventList.value = [];
+        newIndex.value = [];
         if (linkEventData.value.results.length) {
           activeStatus.value =  '';
           const allEvents = [...linkEventList.value, ...linkEventData.value.results];
@@ -863,6 +894,31 @@
         // 默认获取第一个
         [eventItem.value] = linkEventList.value;
         isShowSide.value = !(linkEventList.value.length > 1);
+        newIndex.value = linkEventList.value.map((item, index) => {
+          if (item.status === 'new') {
+            return index;
+          }
+          return -1;
+        }).filter(item => item !== -1);
+
+        if (linkEventList.value.some(item => item.status === 'new')) {
+          // 执行定时器
+          timeout = setTimeout(() => {
+            fetchLinkEvent({
+              start_time: props.data.event_time,
+              end_time: props.data.event_end_time,
+              risk_id: props.data.risk_id,
+              page: currentPage.value,
+              page_size: 50,
+            });
+          }, 5000);
+        } else {
+          // 消除定时器
+          if (timeout) {
+            clearTimeout(timeout);
+            timeout = undefined;
+          }
+        }
       });
     },
   });
@@ -1265,6 +1321,21 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%)
+  color: #3a84ff;
+  transform: translate(-50%, -50%);
+
+  .create-icon {
+    animation: spin 1s linear infinite
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

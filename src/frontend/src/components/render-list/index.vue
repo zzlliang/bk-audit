@@ -142,6 +142,7 @@
     getSelection:()=> void
     initTableHeight: () => void,
     listDataUnshift: (data: Record<string, any>) => void,
+    initListData:() => void
   }
 
   const props = withDefaults(defineProps<Props>(), {
@@ -173,7 +174,7 @@
   const isSearching = ref(false);
 
   let isReady = false;
-
+  const isLoading = ref(false);
   const {
     getSearchParams,
     replaceSearchParams,
@@ -182,7 +183,6 @@
   const {
     run,
     data: listData,
-    loading: isLoading,
     refresh: refreshList,
     cancel,
   // eslint-disable-next-line vue/no-setup-props-destructure
@@ -196,6 +196,7 @@
     onSuccess(data) {
       emits('requestSuccess', data);
       isUnload.value = false;
+      isLoading.value = false;
     },
   });
 
@@ -268,18 +269,21 @@
       order_field: type === 'null' ? undefined : (_.isString(sortPayload.column.field) ? sortPayload.column.field : sortPayload.column.field()),
       order_type: type === 'null' ? undefined : type,
     };
+    isLoading.value = true;
     fetchListData();
   };
   // 切换每页条数
   const handlePageLimitChange = (pageLimit: number) => {
     pagination.limit = pageLimit;
     isUnload.value = false;
+    isLoading.value = true;
     fetchListData();
   };
   // 切换页码
   const handlePageValueChange = (pageValue:number) => {
     pagination.current = pageValue;
     isUnload.value = false;
+    isLoading.value = true;
     fetchListData();
   };
   // 情况搜索条件
@@ -370,10 +374,12 @@
         pagination.current = Number(recordParams.page);
         pagination.limit = Number(recordParams.page_size) < 10 ? 10 : Number(recordParams.page_size);
       }
+      isLoading.value = true;
       fetchListData();
     },
     loading: isLoading,
     refreshList() {
+      isLoading.value = true;
       refreshList();
     },
     getListData() {
@@ -387,6 +393,10 @@
     },
     listDataUnshift(data: Record<string, any>) {
       listData.value.results.unshift(data);
+    },
+    initListData() {
+      isLoading.value = false;
+      refreshList();
     },
   });
 </script>

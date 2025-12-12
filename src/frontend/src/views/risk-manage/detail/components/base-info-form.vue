@@ -84,21 +84,31 @@
                 </p>
               </bk-tag>
             </template>
+            <span v-else>--</span>
           </template>
           <template v-else-if="fieldItem.field_name === 'operator'">
-            <edit-tag :data="data.operator || ''" />
+            <span v-if="isAddRisk">
+              <edit-tag
+                v-if="operatorsComfig[0]?.typeValue === 'user-selector'"
+                :data="operatorsComfig[0].value || ''"
+                style="display: inline-block;" />
+              <span v-else> {{ operatorsComfig[0]?.value ||'--' }} </span>
+            </span>
+            <edit-tag
+              v-else
+              :data="data.operator || ''" />
           </template>
           <template v-else-if="fieldItem.field_name === 'current_operator'">
-            <edit-tag :data="data.current_operator || ''" />
+            <edit-tag :data="(isAddRisk ? processorGroups : data.current_operator) || ''" />
           </template>
           <template v-else-if="fieldItem.field_name === 'notice_users'">
-            <edit-tag :data="data.notice_users || ''" />
+            <edit-tag :data="(isAddRisk ? noticeGroups : data.notice_users) || ''" />
           </template>
           <template v-else-if="fieldItem.field_name === 'event_time'">
-            {{ data.event_time || '--' }}
+            {{ (isAddRisk ? editData?.formData.event_time : data.event_time) || '--' }}
           </template>
           <template v-else-if="fieldItem.field_name === 'event_end_time'">
-            {{ data.event_end_time || '--' }}
+            {{ (isAddRisk ? editData?.formData.event_time : data.event_end_time) || '--' }}
           </template>
           <template v-else-if="fieldItem.field_name === 'rule_id'">
             <router-link
@@ -120,11 +130,13 @@
               :class="{
                 misreport: data.risk_label === 'misreport',
               }">
-              {{ data.risk_label === 'normal' ? t('正常') : t('误报') }}
+              <span v-if="isAddRisk">{{ t('正常') }}</span>
+              <span v-else>{{ data.risk_label === 'normal' ? t('正常') : t('误报') }}</span>
             </span>
           </template>
           <template v-else>
-            {{ data[fieldItem.field_name as keyof RiskManageModel] || '--' }}
+            {{ (isAddRisk ? editData?.formData.event_time
+              : data[fieldItem.field_name as keyof RiskManageModel]) || '--' }}
           </template>
         </render-info-item>
       </render-info-block>
@@ -160,10 +172,20 @@
       name: string,
     }>,
     showFieldNames: Array<StrategyInfo['risk_meta_field_config'][0]>,
+    isAddRisk?: boolean
+    editData?: Record<string, any>
+    noticeGroups?: string[] // 关注人
+    processorGroups?: string[] // 处理人
+    operatorsComfig?: Array<Record<string, any>> // 责任人
   }
 
-  const props = defineProps<Props>();
-
+  const props = withDefaults(defineProps<Props>(), {
+    isAddRisk: false,
+    editData: () => ({}),
+    noticeGroups: () => [],
+    processorGroups: () => [],
+    operatorsComfig: () => [],
+  });
   const { t, locale } = useI18n();
 
   const labelWidth = computed(() => (locale.value === 'en-US' ? 120 : 100));
