@@ -258,7 +258,7 @@
                       <span
                         :class="[
                           displayValueDict.eventData[key]?.isMappings
-                            ? 'tips' : ''
+                            ? 'tips space' : 'space'
                         ]"
                         :style="{
                           color: drillMap.get(key) ? '#3a84ff' : '#313238',
@@ -280,7 +280,7 @@
                             </span>
                             <br>
                             <span>{{ t('展示文本: ') }}</span>
-                            <span>
+                            <span class="space">
                               {{ handleShowText(displayValueDict.eventData[key]?.dict?.name) }}
                             </span>
                           </div>
@@ -293,7 +293,9 @@
                       </template>
                     </bk-popover>
                     <!-- 没有字段映射或者没有证据下探 -->
-                    <span v-else>
+                    <span
+                      v-else
+                      class="space">
                       {{ handleShowText(displayValueDict.eventData[key]?.value) }}
                     </span>
                     <!-- 证据下探按钮 -->
@@ -372,7 +374,7 @@
                       <span
                         :class="[
                           displayValueDict.eventData[key]?.isMappings
-                            ? 'tips' : ''
+                            ? 'tips space' : 'space'
                         ]"
                         :style="{
                           color: drillMap.get(key) ? '#3a84ff' : '#313238',
@@ -394,7 +396,7 @@
                             </span>
                             <br>
                             <span>{{ t('展示文本: ') }}</span>
-                            <span>
+                            <span class="space">
                               {{ displayValueDict.eventData[key]?.dict?.name }}
                             </span>
                           </div>
@@ -407,7 +409,9 @@
                       </template>
                     </bk-popover>
                     <!-- 没有字段映射或者没有证据下探 -->
-                    <span v-else>
+                    <span
+                      v-else
+                      class="space">
                       {{ displayValueDict.eventData[key]?.value }}
                     </span>
                     <!-- 证据下探按钮 -->
@@ -597,6 +601,7 @@
 
   interface Emits {
     (e: 'getEventData', value: any): void
+    (e: 'updatedData'): void
   }
 
   type DisplayValueDict = {
@@ -891,9 +896,7 @@
           linkEventList.value = addEventData.value.unsynced_events.concat(linkEventList.value);
           activeStatus.value = linkEventList.value[0]?.status || '';
         }
-        // 默认获取第一个
-        [eventItem.value] = linkEventList.value;
-        isShowSide.value = !(linkEventList.value.length > 1);
+
         newIndex.value = linkEventList.value.map((item, index) => {
           if (item.status === 'new') {
             return index;
@@ -902,27 +905,44 @@
         }).filter(item => item !== -1);
 
         if (linkEventList.value.some(item => item.status === 'new')) {
-          // 执行定时器
+          // 执行定时器刷新列表
+          activeStatus.value = 'new';
           timeout = setTimeout(() => {
-            fetchLinkEvent({
-              start_time: props.data.event_time,
-              end_time: props.data.event_end_time,
-              risk_id: props.data.risk_id,
-              page: currentPage.value,
-              page_size: 50,
-            });
+            timeoutRefresh();
           }, 5000);
         } else {
-          // 消除定时器
+          // 消除定时器 慢5秒确保最新数据
           if (timeout) {
-            clearTimeout(timeout);
-            timeout = undefined;
+            activeStatus.value = 'new';
+            setTimeout(() => {
+              activeStatus.value = '';
+              emits('updatedData');
+              timeoutRefresh();
+              clearTimeout(timeout);
+              timeout = undefined;
+            }, 5000);
           }
         }
+        // 默认获取第一个
+        [eventItem.value] = linkEventList.value;
+        isShowSide.value = !(linkEventList.value.length > 1);
       });
     },
   });
-
+  // 执行定时器刷新列表
+  const timeoutRefresh = () => {
+    getAddEventList({
+      id: props.data.risk_id,
+    }).then((data) => {
+      fetchLinkEvent({
+        start_time: data.event_time,
+        end_time: data.event_end_time,
+        risk_id: data.risk_id,
+        page: currentPage.value,
+        page_size: 50,
+      });
+    });
+  };
   const handleScroll = (event: Event) => {
     const target = event.target as HTMLDivElement;
     // 下拉触底没有加载完时，继续获取列表
@@ -1029,6 +1049,7 @@
 
   // 添加事件成功
   const handleAddSuccess = () => {
+    active.value = 0;
     linkEventList.value = [];
     nextTick(() => {
       fetchLinkEvent({
@@ -1319,14 +1340,18 @@
 
 .frontend-create {
   position: absolute;
-  top: 50%;
+  top: 50px;
   left: 50%;
   color: #3a84ff;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
 
   .create-icon {
     animation: spin 1s linear infinite
   }
+}
+
+.space {
+  white-space: pre-line;
 }
 
 @keyframes spin {

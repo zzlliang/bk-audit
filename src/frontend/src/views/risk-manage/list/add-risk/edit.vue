@@ -18,6 +18,7 @@
   <div class="config">
     <card-part-vue
       :is-open="false"
+      :show-icon="false"
       :title="t('基础配置')">
       <template #content>
         <div class="flex-center">
@@ -39,7 +40,6 @@
                 </template>
                 <bk-select
                   v-model="formData.strategy_id"
-                  auto-focus
                   class="bk-select"
                   filterable
                   @select="handleSelect">
@@ -67,7 +67,10 @@
         </div>
       </template>
     </card-part-vue>
-    <card-part-vue :title="t('事件数据')">
+    <card-part-vue
+      :is-open="false"
+      :show-icon="false"
+      :title="t('事件数据')">
       <template #content>
         <div v-if="eventList.length === 0">
           {{ t('暂无数据') }}
@@ -140,7 +143,7 @@
               <field-com
                 ref="fieldComRef"
                 :type="item.typeValue"
-                :value="item.value"
+                :value="item.valueText"
                 @update="(val) => handlerUpdate(val, item)" />
             </div>
           </div>
@@ -162,7 +165,7 @@
 
   import fieldCom from './field-components.vue';
 
-  import { convertGMTTimeToStandard } from '@/utils/assist/timestamp-conversion';
+  import { convertGMTTimeToStandard, convertToTimestamp } from '@/utils/assist/timestamp-conversion';
 
   interface Exposes{
     getEditData: () => void;
@@ -191,7 +194,6 @@
     selectedValue.value = value;
     // eslint-disable-next-line max-len
     selectedRiskValue.value = strategyList.value.results.find((item: Record<string, any>) => item.strategy_id === value);
-    console.log('selectedRiskValue.value', selectedRiskValue.value);
     eventList.value = selectedRiskValue.value?.event_data_field_configs.map((item: Record<string, any>) => {
       let typeValueDefault = 'input';
       if (item.field_type === 'string') {
@@ -212,7 +214,6 @@
         value: '',
       };
     }).filter((e: Record<string, any>) => e.is_show);
-    console.log('eventList', eventList.value);
   };
   const typeList = ref([
     {
@@ -273,10 +274,20 @@
   });
 
   const handlerUpdate = (value: any, item: any) => {
+    // 当 long double float int 类型时，需要转换时间格式
+    let valueText: string | number | null = null;
+    if ((item.field_type === 'long' || item.field_type === 'double' || item.field_type === 'float' || item.field_type === 'int')
+      && item.typeValue === 'date-picker') {
+      valueText = convertToTimestamp(value);
+    } else {
+      valueText = value;
+    }
     eventList.value.forEach((eventItem: any) => {
       if (eventItem.field_name === item.field_name  && eventItem.display_name === item.display_name) {
         // eslint-disable-next-line no-param-reassign
-        eventItem.value = value;
+        eventItem.valueText = value;
+        // eslint-disable-next-line no-param-reassign
+        eventItem.value = valueText;
       }
     });
   };

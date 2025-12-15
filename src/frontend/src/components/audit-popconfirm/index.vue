@@ -98,7 +98,7 @@
   const emits = defineEmits<Emits>();
 
 
-  let tippyIns: Instance;
+  let tippyIns: Instance | null = null;
 
   const { t } = useI18n();
 
@@ -112,7 +112,7 @@
       .then(() => props.confirmHandler())
       .then(() => {
         if (props.confirmAutoHide) {
-          tippyIns.hide();
+          tippyIns?.hide();
           emits('hide');
         }
       })
@@ -125,7 +125,7 @@
     Promise.resolve()
       .then(() => props.cancelHandler())
       .then(() => {
-        tippyIns.hide();
+        tippyIns?.hide();
         emits('hide');
       });
   };
@@ -153,14 +153,14 @@
   });
 
   onBeforeUnmount(() => {
-    tippyIns.hide();
-    tippyIns.unmount();
-    tippyIns.destroy();
+    tippyIns?.hide();
+    tippyIns?.unmount();
+    tippyIns?.destroy();
   });
 
   defineExpose<Exposes>({
     hide() {
-      tippyIns.hide();
+      tippyIns?.hide();
     },
   });
 </script>

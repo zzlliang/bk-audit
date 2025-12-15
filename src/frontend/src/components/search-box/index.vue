@@ -77,7 +77,7 @@
                   :paste-fn="pasteFn"
                   :placeholder="t('请输入并按回车键结束')"
                   style="width: 100%;"
-                  @change="(val) => handleValueChange(val, item)" />
+                  @change="(val: any) => handleValueChange(val, item)" />
                 <bk-input
                   v-else
                   v-model="item.value"

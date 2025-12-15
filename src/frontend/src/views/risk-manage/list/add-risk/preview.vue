@@ -68,11 +68,11 @@
             </div>
             <div class="right-info-item">
               <span class="info-item">
-                <span>{{ t('事件发生时间 ') }}</span>:
+                <span class="info-item-left">{{ t('事件发生时间 ') }}</span>:
                 <span class="info-item-value">{{ editData.formData.event_time }}</span>
               </span>
               <span class="info-item">
-                <span>{{ t('责任人') }}</span>:
+                <span class="info-item-left">{{ t('责任人') }}</span>:
                 <span class="info-item-value">
                   <edit-tag
                     v-if="operatorsComfig[0]?.typeValue === 'user-selector'"
@@ -82,7 +82,7 @@
                 </span>
               </span>
               <span class="info-item">
-                <span>{{ t('事件来源') }}</span>:
+                <span class="info-item-left">{{ t('事件来源') }}</span>:
                 <span class="info-item-value">
                   <edit-tag
                     v-if="eventSourceComfig[0]?.typeValue === 'user-selector'"
@@ -92,7 +92,7 @@
                 </span>
               </span>
               <span class="info-item">
-                <span>{{ t('事件类型') }}</span>:
+                <span class="info-item-left">{{ t('事件类型') }}</span>:
                 <span class="info-item-value">
                   <edit-tag
                     v-if="eventTypeComfig[0]?.typeValue === 'user-selector'"
@@ -104,11 +104,11 @@
               </span>
               <div class="info-item-line">
                 <span class="line-item">
-                  <span>{{ t('事件描述') }}</span>:
+                  <span class="info-item-left">{{ t('事件描述') }}</span>:
                   <span class="line-value">
                     <edit-tag
                       v-if="eventTypeComfig[0]?.typeValue === 'user-selector'"
-                      :data="eventTypeComfig[0].value || ''"
+                      :data="eventTypeComfig[0].value || []"
                       style="display: inline-block;" />
                     <span v-else> {{ eventTypeComfig[0]?.value ||'--' }} </span>
                   </span>
@@ -131,15 +131,14 @@
                     disabled: eventItem.description === '',
                     placement: 'top'
                   }"
-                  :class="eventItem.description !== '' ? 'dashed-underline' : '' ">
+                  :class="eventItem.description !== '' ? 'dashed-underline info-item-left' : 'info-item-left' ">
                   {{ eventItem.display_name }}</span>:
                 <span
                   v-if="eventItem.typeValue === 'user-selector'"
                   class="info-item-value">
-                  <bk-tag
-                    v-for="valueItem in eventItem.value"
-                    :key="valueItem"
-                    style="margin-left: 5px;"> {{ valueItem }}</bk-tag>
+                  <edit-tag
+                    :data="eventItem.value || []"
+                    style="display: inline-block;" />
                 </span>
                 <span
                   v-else
@@ -217,6 +216,7 @@
   const borderStyle = computed(() => ({
     'border-top': `6px solid ${riskLevelMap[props.editData.selectedRiskValue.risk_level]?.color}`,
   }));
+
   const {
     data: strategyList,
   } = useRequest(StrategyManageService.fetchAllStrategyList, {
@@ -410,7 +410,8 @@
 
     .event-list {
       display: flex;
-      width: 96%;
+
+      /* width: 96%; */
       padding-bottom: 10px;
       margin-top: 20px;
       margin-left: 2%;
@@ -460,8 +461,20 @@
     }
   }
 
+  .info-item-left {
+    display: inline-block;
+    max-width: 25%;
+    min-width: 120px;
+    text-align: right;
+  }
+
   .info-item-value {
+    display: inline-block;
+    width: 55%;
     padding-left: 5px;
+    text-align: left;
+    white-space: pre-line;
+    vertical-align: middle;
   }
 
   .dashed-underline {

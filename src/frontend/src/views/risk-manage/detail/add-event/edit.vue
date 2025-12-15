@@ -260,10 +260,18 @@
   };
 
   const handlerUpdate = (value: any, item: any) => {
+    // 当 long double float int 类型时，需要转换时间格式
+    let valueText: string | number | null = null;
+    if ((item.field_type === 'long' || item.field_type === 'double' || item.field_type === 'float' || item.field_type === 'int')
+      && item.typeValue === 'date-picker') {
+      valueText = convertToTimestamp(value);
+    } else {
+      valueText = value;
+    }
     eventList.value.forEach((eventItem: any) => {
       if (eventItem.field_name === item.field_name  && eventItem.display_name === item.display_name) {
         // eslint-disable-next-line no-param-reassign
-        eventItem.value = value;
+        eventItem.value = valueText;
       }
     });
   };

@@ -315,7 +315,6 @@
       fixed: 'right',
       render: ({ data }: { data: RiskManageModel }) => (
         data.status === 'stand_by' ? <div>
-          <bk-button text  class='mr16'>{t('--')}</bk-button>
         <bk-button text  class='mr16'>{t('--')}</bk-button></div>
         :     (<p>
         {
@@ -375,11 +374,8 @@
     risk_id: 'risk_id',
     title: 'title',
     risk_level: 'risk_level',
-    // operator: 'operator',
     status: 'status',
     current_operator: 'current_operator',
-    // last_operate_time: 'last_operate_time',
-    // risk_label: 'risk_label',
   };
   const handleSelectEnable = (item: any) => {
     if (item.row.status === 'stand_by') {
@@ -470,7 +466,8 @@
   });
 
   const handleRowClass = (row: Record<string, any>) => {
-    if (row.status === 'stand_by') {
+    const addEventRiskIds = JSON.parse(sessionStorage.getItem('addEventRiskIds') || '[]');
+    if (row.status === 'stand_by' || addEventRiskIds.includes(row.risk_id)) {
       return 'new-row';
     }
   };
@@ -486,6 +483,7 @@
   // 记录轮训的数据
   // const pollingDataMap = ref<Record<string, RiskManageModel>>({});
   const handleRequestSuccess = ({ results }: {results: Array<RiskManageModel>}) => {
+    window.changeConfirm = false;
     selectedItemList.value =  searchBoxRef.value?.getSelectedItemList();
     if (JSON.stringify(tableColumn.value) !== JSON.stringify(initColumns())) {
       tableColumn.value =  initColumns();
@@ -500,7 +498,7 @@
       // 执行定时器
       timeout = setTimeout(() => {
         listRef.value?.initListData();
-      }, 1000);
+      }, 5000);
     } else {
       // 消除定时器
       if (timeout) {
@@ -625,6 +623,7 @@
   onMounted(() => {
     nextTick(() => {
       getEventFields();
+      sessionStorage.removeItem('addEventRiskIds');
     });
   });
   onUnmounted(() => {

@@ -29,7 +29,7 @@
           :label-width="labelWidth"
           :style="getFieldStyle(fieldItem.field_name)">
           <template v-if="fieldItem.field_name === 'risk_id'">
-            {{ data.risk_id }}
+            {{ data.risk_id || '--' }}
           </template>
           <template v-else-if="fieldItem.field_name === 'risk_level'">
             <span
@@ -40,12 +40,12 @@
                 'border-radius': '3px',
                 color: 'white'
               }">
-              {{ riskLevelMap[data.risk_level].label }}
+              {{ riskLevelMap[data.risk_level].label || '--' }}
             </span>
             <span v-else>--</span>
           </template>
           <template v-else-if="fieldItem.field_name === 'event_type'">
-            {{ data.event_type?.join('、') || '--' }}
+            {{ handleShowText(data.event_type) || '--' }}
           </template>
           <template v-else-if="fieldItem.field_name === 'risk_tags'">
             <edit-tag :data="data.tags?.map(item=>strategyTagMap[item] || item) || ''" />
@@ -65,7 +65,7 @@
             <span v-else>--</span>
           </template>
           <template v-else-if="fieldItem.field_name === 'event_content'">
-            {{ data.event_content }}
+            {{ data.event_content || '--' }}
           </template>
           <template v-else-if="fieldItem.field_name === 'risk_hazard'">
             {{ data.risk_hazard || '--' }}
@@ -96,13 +96,14 @@
             </span>
             <edit-tag
               v-else
-              :data="data.operator || ''" />
+              :data="(typeof data.operator === 'string' ?
+                handleShowText(data.operator).split(',') : data.operator) || ''" />
           </template>
           <template v-else-if="fieldItem.field_name === 'current_operator'">
-            <edit-tag :data="(isAddRisk ? processorGroups : data.current_operator) || ''" />
+            <edit-tag :data="(isAddRisk ? processorGroups : data.current_operator) || []" />
           </template>
           <template v-else-if="fieldItem.field_name === 'notice_users'">
-            <edit-tag :data="(isAddRisk ? noticeGroups : data.notice_users) || ''" />
+            <edit-tag :data="(isAddRisk ? noticeGroups : data.notice_users) || []" />
           </template>
           <template v-else-if="fieldItem.field_name === 'event_time'">
             {{ (isAddRisk ? editData?.formData.event_time : data.event_time) || '--' }}
@@ -241,7 +242,27 @@
       color: '#0CA668',
     },
   };
+  // 判断值是否为数组（包括字符串形式的数组）
+  const handleShowText = (value: any) => {
+    // 1. 如果是真正的数组，直接连接
+    if (Array.isArray(value)) {
+      return value.length > 0 ? value.join(',') : '--';
+    }
 
+    // 2. 如果是字符串且看起来像数组，尝试解析
+    if (typeof value === 'string' && value.trim().startsWith('[') && value.trim().endsWith(']')) {
+      try {
+        const parsedArray = JSON.parse(value);
+        if (Array.isArray(parsedArray)) {
+          return parsedArray.length > 0 ? parsedArray.join(',') : '';
+        }
+      } catch (error) {
+        return value  || '';
+      }
+    }
+    // 3. 其他情况直接返回原值
+    return value || '';
+  };
   const strategyName = computed(() => {
     const { data } = props;
     const item = props.strategyList.find(item => item.value === data.strategy_id);

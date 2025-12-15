@@ -111,7 +111,7 @@
     return  (typeof props.data) === 'string' ? [props.data].slice(renderTagNum.value).join(',') : props.data.slice(renderTagNum.value).join(',');
   });
 
-  let tippyIns: Instance;
+  let tippyIns: Instance | null = null;
 
   const calcRenderTagNum = () => {
     if (props.max && props.max > 0) {
@@ -180,9 +180,9 @@
       return;
     }
     if (tippyIns) {
-      tippyIns.hide();
-      tippyIns.unmount();
-      tippyIns.destroy();
+      tippyIns?.hide();
+      tippyIns?.unmount();
+      tippyIns?.destroy();
     }
     nextTick(() => {
       tippyIns = tippy(moreRef.value.$el as SingleTarget, {
@@ -252,9 +252,9 @@
 
   onBeforeUnmount(() => {
     if (tippyIns) {
-      tippyIns.hide();
-      tippyIns.unmount();
-      tippyIns.destroy();
+      tippyIns?.hide();
+      tippyIns?.unmount();
+      tippyIns?.destroy();
     }
     resizeObserver?.disconnect();
   });

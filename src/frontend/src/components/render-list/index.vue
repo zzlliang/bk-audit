@@ -396,7 +396,7 @@
     },
     initListData() {
       isLoading.value = false;
-      refreshList();
+      fetchListData();
     },
   });
 </script>
