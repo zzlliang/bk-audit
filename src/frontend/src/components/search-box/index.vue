@@ -154,7 +154,7 @@
   import RenderValue from './components/render-value/index.vue';
 
   interface Emits {
-    (e: 'change', value: Record<string, any>, otherValue?: any): void;
+    (e: 'change', value: Record<string, any>, otherValue?: any, isClear?: boolean): void;
     (e: 'changeTableHeight'): void;
     (e: 'export'): void;
     (e: 'batch'): void;
@@ -391,8 +391,8 @@
     return result;
   };
   // 提交搜索条件
-  const handleSubmit = () => {
-    emit('change', getSearchParams(), eventFiltersParams.value);
+  const handleSubmit = (isClear = false) => {
+    emit('change', getSearchParams(), eventFiltersParams.value, isClear);
   };
   const handleClear = () => {
     searchModel.value = {
@@ -412,7 +412,7 @@
     }));
 
     selectedVal.value = selectedItemList.value.map(item => item.id);
-    handleSubmit();
+    handleSubmit(true);
   };
   const findIdByDisplayAndField = (display: string, field: string, ary: Array<Record<string, any>>) => {
     const foundItem = ary.find(item => item

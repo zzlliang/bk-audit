@@ -142,7 +142,8 @@
     getSelection:()=> void
     initTableHeight: () => void,
     listDataUnshift: (data: Record<string, any>) => void,
-    initListData:() => void
+    initListData:(data: any, key: string) => void
+    initData: () => void
   }
 
   const props = withDefaults(defineProps<Props>(), {
@@ -394,7 +395,19 @@
     listDataUnshift(data: Record<string, any>) {
       listData.value.results.unshift(data);
     },
-    initListData() {
+    initListData(data: any, key: string) {
+      isLoading.value = false;
+      const initData = JSON.parse(JSON.stringify(listData.value));
+      initData.results = listData.value.results.map((item: Record<string, any>) => {
+        const newItem = data.find((findItem: Record<string, any>) => item[key] === findItem[key]);
+        if (newItem) {
+          return newItem;
+        }
+        return item;
+      });
+      emits('requestSuccess', initData);
+    },
+    initData() {
       isLoading.value = false;
       fetchListData();
     },

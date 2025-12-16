@@ -387,7 +387,7 @@
     const fieldNames = selectedItemList.value.map(item => `event_data.${item.field_name}`);
     const list = selectedItemList.value.length > 0 ? tableColumn.value : initTableColumns;
     return  {
-      fields: list.reduce((res, item, index) => {
+      fields: list.reduce((res:any, item: any, index: number) => {
         if (item.field) {
           const fieldValue = typeof item.field === 'function' ? item.field(item, index) : item.field;
           const labelValue = typeof item.label === 'function' ? item.label(item, index) : item.label;
@@ -467,7 +467,7 @@
 
   const handleRowClass = (row: Record<string, any>) => {
     const addEventRiskIds = JSON.parse(sessionStorage.getItem('addEventRiskIds') || '[]');
-    if (row.status === 'stand_by' || addEventRiskIds.includes(row.risk_id)) {
+    if (row.status === 'stand_by' && addEventRiskIds.includes(row.risk_id)) {
       return 'new-row';
     }
   };
@@ -478,6 +478,17 @@
     run: fetchRiskLevel,
   } = useRequest(StrategyManageService.fetchRiskLevel, {
     defaultValue: {},
+  });
+
+  const {
+    run: fetchRiskList,
+  } = useRequest(RiskManageService.fetchRiskList, {
+    defaultValue: {
+      results: [],
+      page: 0,
+      num_pages: 0,
+      total: 0,
+    },
   });
 
   // 记录轮训的数据
@@ -497,13 +508,24 @@
     if (results.some(item => item.status === 'stand_by')) {
       // 执行定时器
       timeout = setTimeout(() => {
-        listRef.value?.initListData();
+        const addEventRiskIds = JSON.parse(sessionStorage.getItem('addEventRiskIds') || '[]');
+        if (addEventRiskIds.length === 0) {
+          listRef.value?.initData();
+        }
+        fetchRiskList({
+          risk_id: addEventRiskIds.join(','),
+          page: 1,
+          page_size: 20,
+        }).then((data) => {
+          listRef.value?.initListData(data.results, 'risk_id');
+        });
       }, 5000);
     } else {
       // 消除定时器
       if (timeout) {
         clearTimeout(timeout);
         timeout = undefined;
+        listRef.value?.initData();
       }
     }
   };
@@ -575,7 +597,10 @@
     }
   };
   // 搜索
-  const handleSearchChange = (value: Record<string, any>, exValue:  Record<string, any>) => {
+  const handleSearchChange = (value: Record<string, any>, exValue:  Record<string, any>, isClear?: boolean) => {
+    if (!isClear) {
+      sessionStorage.removeItem('addEventRiskIds');
+    }
     searchModel.value = {
       ...value,
       event_filters: exValue };
