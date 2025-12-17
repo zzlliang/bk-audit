@@ -134,7 +134,19 @@
                             drillMap.get(basicItem.field_name),
                             basicItem.field_name
                           )">
-                          {{ handleShowText(displayValueDict[basicItem.field_name as DisplayValueKeysWithoutEventData]?.value ) }}
+                          <edit-tag
+                            v-if="basicItem.field_name === 'operator'"
+                            :data="handleShowText(displayValueDict[basicItem.field_name as DisplayValueKeysWithoutEventData]?.value)"
+                            :max="99"
+                            :show-copy="false"
+                            style="display: inline-block;"
+                            @click="handleUseTool(
+                              drillMap.get(basicItem.field_name),
+                              basicItem.field_name
+                            )" />
+                          <span v-else>
+                            {{ handleShowText(displayValueDict[basicItem.field_name as DisplayValueKeysWithoutEventData]?.value ) }}
+                          </span>
                         </span>
                         <template #content>
                           <div>
@@ -541,6 +553,8 @@
   import EventModel from '@model/event/event';
   import type RiskManageModel from '@model/risk/risk';
   import type StrategyInfo from '@model/risk/strategy-info';
+
+  import EditTag from '@components/edit-box/tag.vue';
 
   // import Tooltips from '@components/show-tooltips-text/index.vue';
   import RenderInfoBlock from '@views/strategy-manage/list/components/render-info-block.vue';

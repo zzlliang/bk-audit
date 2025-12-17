@@ -279,6 +279,8 @@
     if ((item.field_type === 'long' || item.field_type === 'double' || item.field_type === 'float' || item.field_type === 'int')
       && item.typeValue === 'date-picker') {
       valueText = convertToTimestamp(value);
+    } else if (item.typeValue === 'user-selector') {
+      valueText = value.join(',');
     } else {
       valueText = value;
     }

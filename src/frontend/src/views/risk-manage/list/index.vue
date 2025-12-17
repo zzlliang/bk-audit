@@ -525,7 +525,7 @@
       if (timeout) {
         clearTimeout(timeout);
         timeout = undefined;
-        listRef.value?.initData();
+        tableColumn.value =  initColumns();
       }
     }
   };

@@ -398,14 +398,14 @@
     initListData(data: any, key: string) {
       isLoading.value = false;
       const initData = JSON.parse(JSON.stringify(listData.value));
-      initData.results = listData.value.results.map((item: Record<string, any>) => {
+      listData.value.results = initData.results.map((item: Record<string, any>) => {
         const newItem = data.find((findItem: Record<string, any>) => item[key] === findItem[key]);
         if (newItem) {
           return newItem;
         }
         return item;
       });
-      emits('requestSuccess', initData);
+      emits('requestSuccess',  listData.value);
     },
     initData() {
       isLoading.value = false;

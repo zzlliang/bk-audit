@@ -151,7 +151,7 @@
   const handleSubmit = () => {
     const eventDataParams = editData.value.eventData.reduce((acc: any, item: any) => ({
       ...acc,
-      [item.display_name]: item.value,
+      [item.field_name]: item.value,
     }), {});
     const params = {
       events: [

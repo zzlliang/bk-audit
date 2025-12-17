@@ -76,9 +76,9 @@
                 <span class="info-item-value">
                   <edit-tag
                     v-if="operatorsComfig[0]?.typeValue === 'user-selector'"
-                    :data="operatorsComfig[0].value || ''"
+                    :data="operatorsComfig[0].valueText || ''"
                     style="display: inline-block;" />
-                  <span v-else> {{ operatorsComfig[0]?.value ||'--' }} </span>
+                  <span v-else> {{ operatorsComfig[0]?.valueText ||'--' }} </span>
                 </span>
               </span>
               <span class="info-item">

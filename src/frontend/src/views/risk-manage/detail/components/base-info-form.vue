@@ -136,7 +136,7 @@
             </span>
           </template>
           <template v-else>
-            {{ (isAddRisk ? editData?.formData.event_time
+            {{ (isAddRisk ? '--'
               : data[fieldItem.field_name as keyof RiskManageModel]) || '--' }}
           </template>
         </render-info-item>
