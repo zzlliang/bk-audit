@@ -467,7 +467,7 @@
 
   const handleRowClass = (row: Record<string, any>) => {
     const addEventRiskIds = JSON.parse(sessionStorage.getItem('addEventRiskIds') || '[]');
-    if (row.status === 'stand_by' && addEventRiskIds.includes(row.risk_id)) {
+    if (row.status === 'stand_by' || addEventRiskIds.includes(row.risk_id)) {
       return 'new-row';
     }
   };
