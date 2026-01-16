@@ -184,11 +184,12 @@
                       <span v-else>
                         <edit-tag
                           v-if="basicItem.field_name === 'operator'"
-                          :data="handleShowText(displayValueDict[basicItem.field_name as DisplayValueKeysWithoutEventData]?.value)"
+                          :data="handleShowText(displayValueDict[basicItem.field_name as DisplayValueKeysWithoutEventData]?.value) === '--' ? [] :
+                            [handleShowText(displayValueDict[basicItem.field_name as DisplayValueKeysWithoutEventData]?.value)]"
                           :max="99"
                           style="display: inline-block;" />
                         <span v-else>
-                          {{ handleShowText(displayValueDict[basicItem.field_name as DisplayValueKeysWithoutEventData]?.value ) }}
+                          {{ handleShowText(displayValueDict[basicItem.field_name as DisplayValueKeysWithoutEventData]?.value ) || '--' }}
                         </span>
                       </span>
                     </template>
