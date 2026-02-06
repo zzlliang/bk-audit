@@ -347,7 +347,7 @@
     if (value === null || value === '') {
       return [];
     }
-    return value.toString().split(',');
+    return value?.toString().split(',');
   };
   // 解析 url 上面附带的查询参数
   Object.keys(urlSearchParams).forEach((searchFieldName) => {
