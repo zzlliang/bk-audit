@@ -61,7 +61,7 @@
             <div class="field-header-row">
               <div
                 class="field-value"
-                style="flex: 0 0 200px;">
+                style="flex: 0 0 200px;border-left: none;">
                 {{ t('字段名') }}
               </div>
               <div
@@ -105,7 +105,7 @@
                   <div class="field-row">
                     <div
                       class="field-value"
-                      style="flex: 0 0 200px;">
+                      style="flex: 0 0 200px;border-left: none;">
                       <audit-icon
                         class="field-value-move"
                         type="move" />
@@ -125,7 +125,7 @@
                     </div>
                     <div
                       class="field-value"
-                      style="flex: 0 0 250px;">
+                      style="flex: 0 0 250px;background-color: #fff;">
                       <bk-form-item
                         error-display-type="tooltips"
                         label=""
@@ -154,7 +154,7 @@
                     </div>
                     <div
                       class="field-value"
-                      style="flex: 0 0 300px;">
+                      style="flex: 0 0 300px;background-color: #fff;">
                       <bk-form-item
                         error-display-type="tooltips"
                         label=""
@@ -248,7 +248,7 @@
                     </div>
                     <div
                       class="field-value"
-                      style="flex: 0 0 50px;">
+                      style="flex: 0 0 50px;border-right: none !important;">
                       <audit-icon
                         class="reduce-fill field-icon"
                         type="reduce-fill"
@@ -703,7 +703,6 @@
     text-align: center;
     background: #fafbfd;
     border-right: .5px solid #c4c6cc;
-    border-bottom: .5px solid #c4c6cc;
     border-radius: 2px 0 0 2px;
   }
 
@@ -869,8 +868,7 @@
   font-size: 12px;
   line-height: 42px;
   color: #63656e;
-  border-right: 1px solid #dcdee5;
-  border-bottom: 1px solid #dcdee5;
+  border-top: 1px solid #dcdee5;
 }
 
 .field-icon {
@@ -925,5 +923,9 @@
   margin-left: 5px;
   color: #63656e;
   cursor: pointer;
+}
+
+.list-table-body {
+  background-color: #fafbfd;
 }
 </style>
