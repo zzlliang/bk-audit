@@ -278,12 +278,15 @@
                     v-model="item.default_value" />
                   <div
                     v-else-if="item.field_category === 'time_range_select' || item.field_category === 'time-ranger'"
+                    class="time-range-select-wrapper"
                     @mouseenter.stop="handleMouseEnterTimeRange(index)"
                     @mouseleave.stop="handleMouseLeaveTimeRange">
-                    <div style="position: relative;">
+                    <div style="position: relative; width: 100%; height: 100%;">
                       <date-picker
                         v-model="item.time_range"
-                        style="width: 100%;height: 87px;border: none;"
+                        class="time-range-picker"
+                        :placeholder="t('请选择')"
+                        style="width: 100%; height: 100%; border: none;"
                         @update:model-value="() => handelTimeVarItem(item)" />
                       <audit-icon
                         v-show="MouseEnterTimeRange === index && item.time_range.length > 0"
@@ -943,5 +946,32 @@ Body: 请求体中,一般用于Post请求参数,例如：{ "name": "Tom", "age":
   text-decoration-color: #c4c6cc;
   text-underline-offset: 5px;
   cursor: pointer;
+}
+
+.time-range-select-wrapper {
+  width: 100%;
+  height: 100%;
+  min-height: 42px;
+  cursor: pointer;
+
+  .time-range-picker {
+    width: 100%;
+    height: 100%;
+    min-height: 42px;
+
+    :deep(.date-content) {
+      width: 100%;
+      height: 100%;
+      min-height: 42px;
+      cursor: pointer;
+    }
+
+    :deep(.date-picker-input) {
+      width: 100%;
+      height: 100%;
+      min-height: 42px;
+      cursor: pointer;
+    }
+  }
 }
 </style>
