@@ -248,8 +248,8 @@
             {{ t('场景风险') }}
           </audit-menu-item>
         </template>
-        <template v-else-if="menuData.length && curNavName === 'auditStatement'">
-          <statement-sidebar :menu-data="menuData" />
+        <template v-else-if="curNavName === 'auditStatement'">
+          <reports-sidebar :menu-data="menuData" />
         </template>
         <template v-else-if="curNavName === 'nweSystemManage'">
           <div class="system-select">
