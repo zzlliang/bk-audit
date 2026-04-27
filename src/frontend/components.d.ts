@@ -41,6 +41,7 @@ declare module 'vue' {
     NoticeGroup: typeof import('./src/components/skeleton-loading/components/notice-group.vue')['default']
     Option: typeof import('./src/components/auth/option.vue')['default']
     Page: typeof import('./src/components/apply-permission/page.vue')['default']
+    Platfrom: typeof import('./src/components/statement-sidebar/platfrom.vue')['default']
     PreviewResult: typeof import('./src/components/ip-selector/selector-box/components/preview-result/index.vue')['default']
     RelationShip: typeof import('./src/components/relation-ship/index.vue')['default']
     RenderCustomInput: typeof import('./src/components/ip-selector/selector-box/components/render-custom-input.vue')['default']
