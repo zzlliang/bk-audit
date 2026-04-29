@@ -239,6 +239,14 @@
               type="gaojingshijian" />
             {{ t('所有风险') }}
           </audit-menu-item>
+          <audit-menu-item
+            v-if="hasAllRiskPermission"
+            index="sceneRiskManage">
+            <audit-icon
+              class="menu-item-icon"
+              type="gaojingshijian" />
+            {{ t('场景风险') }}
+          </audit-menu-item>
         </template>
         <template v-else-if="menuData.length && curNavName === 'auditStatement'">
           <statement-sidebar :menu-data="menuData" />
