@@ -59,6 +59,8 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     RuleIndex: typeof import('./src/components/application-parameter/rule-index.vue')['default']
+    SceneConfig: typeof import('./src/components/statement-sidebar/scene-config.vue')['default']
+    SceneSystemSelector: typeof import('./src/components/scene-system-selector/index.vue')['default']
     ScrollFaker: typeof import('./src/components/scroll-faker/index.vue')['default']
     SearchBox: typeof import('./src/components/search-box/index.vue')['default']
     Select: typeof import('./src/components/search-box/components/render-field-config/components/select.vue')['default']
