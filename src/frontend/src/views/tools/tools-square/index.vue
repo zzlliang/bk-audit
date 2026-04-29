@@ -79,16 +79,29 @@
           ref="ContentCardRef"
           :my-created="tagId === '-4'"
           :recent-used="tagId === '-5'"
+          :scope-params="scopeParams"
           :tag-id="tagId"
           :tags-enums="tagsEnums"
-          @change="handleChange" />
+          @change="handleChange"
+          @open-tool="handleOpenTool" />
+        <tool-info-panel
+          v-else
+          :active-uid="activeToolUid"
+          :scope-params="scopeParams"
+          :tags-enums="tagsEnums"
+          :tool-list="openedTools"
+          @add-tool="handleAddToolFromPopover"
+          @close="handleCloseToolPanel"
+          @close-tab="handleCloseTab"
+          @go-home="handleGoHomePage"
+          @switch-tab="switchTab" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang='ts'>
-  import { onMounted, ref } from 'vue';
+  import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 
   import ToolManageService from '@service/tool-manage';
 
@@ -100,6 +113,7 @@
 
   import ContentCard from './square-content/concent-card.vue';
 
+  import useEventBus from '@/hooks/use-event-bus';
   import useRequest from '@/hooks/use-request';
 
   interface TagItem {
@@ -135,10 +149,29 @@
   // 场景选择器
   const selectedScene = ref<SceneItem | null>();
 
+  // 将选择器值转换为 scope 参数
+  const scopeParams = computed(() => {
+    const item = selectedScene.value;
+    // 未选择场景时，默认使用跨场景类型（scope_type 为后端必填字段）
+    if (!item) return { scope_type: 'cross_scene' };
+    if (item.type === 'aggregate') {
+      return {
+        scope_type: item.id === 'allSecen' ? 'cross_scene' : 'cross_system',
+      };
+    }
+    return {
+      scope_type: item.type, // 'scene' | 'system'
+      scope_id: item.id,
+    };
+  });
+
   // 场景切换
   const handleSceneChange = (value: SceneItem | null) => {
-    console.log('场景切换:', value);
-    // TODO: 根据选择的场景/系统重新加载工具列表
+    selectedScene.value = value;
+    // 切换场景/系统时重新拉取标签和工具列表
+    refreshTagsList();
+    if (hasOpenedTools.value) return;
+    ContentCardRef.value?.getToolsList(tagId.value);
   };
 
   const {
@@ -159,7 +192,7 @@
   };
   // 右边数据刷新
   const handleChange = () => {
-    fetchToolsTagsList();
+    refreshTagsList();
   };
   // 工具标签列表
   const {
@@ -181,13 +214,99 @@
       }));
 
       tagsEnums.value = strategyLabelList.value;
-      renderLabelRef.value?.resetAll([]);
+      // 初始化阶段（tagId 为空）：通过 resetAll 触发 handleChecked 来加载工具列表
+      // 场景切换阶段（tagId 已有值）：只更新标签数据，工具列表已在 handleSceneChange 中触发
+      if (!tagId.value) {
+        renderLabelRef.value?.resetAll([]);
+      }
     },
   });
 
+  // 刷新标签列表（带 scope 参数）
+  const refreshTagsList = () => {
+    fetchToolsTagsList(scopeParams.value);
+  };
+
+  const handleOpenTool = (tool: ToolInfo) => {
+    openTool(tool);
+    isSidebarCollapsed.value = true;
+  };
+
+  const handleAddToolFromPopover = (tool: ToolInfo) => {
+    openTool(tool, false);
+  };
+
+  const handleGoHomePage = async () => {
+    isReturningHome.value = true;
+    tagId.value = '-3';
+    goHome();
+    await nextTick();
+    await nextTick();
+    renderLabelRef.value?.setLabel('-3');
+    ContentCardRef.value?.getToolsList(tagId.value);
+    isReturningHome.value = false;
+  };
+
+  // 关闭整个工具详情面板（点击 ×）
+  const handleCloseToolPanel = async () => {
+    clearAll();
+    isSidebarCollapsed.value = false;
+    await nextTick();
+    ContentCardRef.value?.getToolsList(tagId.value);
+  };
+
+  // 关闭单个 tab
+  const handleCloseTab = async (uid: string) => {
+    closeTab(uid);
+    if (!hasOpenedTools.value) {
+      await nextTick();
+      ContentCardRef.value?.getToolsList(tagId.value);
+    }
+  };
+
+  watch(hasOpenedTools, (val) => {
+    if (val) {
+      isSidebarCollapsed.value = true;
+    } else {
+      isSidebarCollapsed.value = false;
+    }
+  }, { immediate: true });
+
+  watch(isSidebarCollapsed, (val) => {
+    if (!val) {
+      if (isReturningHome.value) return;
+      nextTick(() => {
+        renderLabelRef.value?.resetAll([]);
+        if (hasOpenedTools.value) {
+          renderLabelRef.value?.setLabel('');
+        } else {
+          const restoreLabel = (!tagId.value || tagId.value === '-3') ? '-3' : tagId.value;
+          renderLabelRef.value?.setLabel(restoreLabel);
+        }
+      });
+    }
+  });
+
+  // 监听场景切换事件
+  const { on: onEvent, off } = useEventBus();
+
+  // 刷新所有数据（场景切换时调用）
+  const refreshAllData = () => {
+    refreshTagsList();
+    if (hasOpenedTools.value) return;
+    ContentCardRef.value?.getToolsList(tagId.value);
+  };
 
   onMounted(() => {
-    fetchToolsTagsList();
+    refreshTagsList();
+    // 监听场景切换事件
+    onEvent('scene:change', () => {
+      refreshAllData();
+    });
+  });
+
+  onUnmounted(() => {
+    off('scene:change');
   });
 </script>
 
