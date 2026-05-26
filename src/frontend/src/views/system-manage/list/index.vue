@@ -459,6 +459,9 @@
   const handleCreate = () => {
     router.push({
       name: 'systemAccess',
+      params: {
+        isShowSideBar: 'true',
+      },
     });
   };
 
