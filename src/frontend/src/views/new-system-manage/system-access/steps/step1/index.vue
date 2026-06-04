@@ -547,7 +547,8 @@
   };
 
   const handlerManagersChange = (val: string | string[]) => {
-    formData.value.managers = Array.isArray(val) ? val : [val];
+    // eslint-disable-next-line no-nested-ternary
+    formData.value.managers = Array.isArray(val) ? val : val ? [val] : [];
   };
 
   const handlerRouteChange = (type: string) => {
