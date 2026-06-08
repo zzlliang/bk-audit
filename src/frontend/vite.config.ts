@@ -24,13 +24,48 @@ import basicSsl from '@vitejs/plugin-basic-ssl';
 import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
 
+const manualChunks = (id: string) => {
+  if (!id.includes('node_modules')) {
+    return undefined;
+  }
+
+  if (id.includes('monaco-editor') || id.includes('vite-plugin-monaco-editor')) {
+    return 'monaco';
+  }
+  if (id.includes('echarts') || id.includes('zrender')) {
+    return 'echarts';
+  }
+  if (id.includes('bkui-vue') || id.includes('@blueking')) {
+    return 'blueking';
+  }
+  if (id.includes('@vueup/vue-quill') || id.includes('quill')) {
+    return 'quill';
+  }
+  if (id.includes('xlsx') || id.includes('sheetjs')) {
+    return 'xlsx';
+  }
+  if (id.includes('vue-i18n')) {
+    return 'vue-i18n';
+  }
+  if (id.includes('vue-router') || id.includes('/vue/') || id.includes('/@vue/')) {
+    return 'vue-vendor';
+  }
+  if (id.includes('markdown-it') || id.includes('dompurify') || id.includes('axios')
+    || id.includes('dayjs') || id.includes('lodash')) {
+    return 'utils';
+  }
+
+  return 'vendor';
+};
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const isDevelopment = mode === 'development';
+  const isProduction = !isDevelopment;
 
   return {
-    logLevel: 'error',
+    // 开发保持安静；生产构建输出进度日志，避免长时间无输出
+    logLevel: isDevelopment ? 'error' : 'info',
     base: process.env.AUDIT_VITE_BUILD_BASE_DIR || '/',
     publicDir: 'static',
     plugins: [
@@ -40,7 +75,7 @@ export default defineConfig(({ mode }) => {
         },
       }),
       vueJsx(),
-      basicSsl(),
+      isDevelopment && basicSsl(),
       monacoEditorPlugin({}),
       isDevelopment && VitePluginHtmlEnv({
         prefix: '{{ ',
@@ -48,10 +83,10 @@ export default defineConfig(({ mode }) => {
         envPrefixes: 'AUDIT_',
       }),
       Components({
-        dts: true,
+        dts: isDevelopment,
         include: [/src\/components/],
       }),
-    ].filter(_ => _),
+    ].filter(Boolean),
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
@@ -70,6 +105,18 @@ export default defineConfig(({ mode }) => {
       },
     },
     envPrefix: 'AUDIT_',
+    build: isProduction ? {
+      sourcemap: false,
+      reportCompressedSize: false,
+      cssCodeSplit: true,
+      chunkSizeWarningLimit: 2000,
+      rollupOptions: {
+        maxParallelFileOps: 2,
+        output: {
+          manualChunks,
+        },
+      },
+    } : undefined,
     server: {
       https: {},
       port: 8082,
