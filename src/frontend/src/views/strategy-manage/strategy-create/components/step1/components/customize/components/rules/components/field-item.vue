@@ -294,6 +294,7 @@
       condition.filter = singleVal;
       condition.filters = [];
     } else {
+      // eslint-disable-next-line no-nested-ternary
       const val = Array.isArray(value) ? value : (value ? [value] : []);
       condition.filters = val;
       condition.filter = '';
