@@ -25,27 +25,11 @@ import IamManageService from '@service/iam-manage';
 import type ConfigModel from '@model/root/config';
 
 import NotFound from '@views/404.vue';
-import AnalysisManage from '@views/analysis-manage/routes'; // 检索
-import AttentionManage from '@views/attention-manege/routes'; // 我的关注
-import EventManage from '@views/event-manage/routes'; // 审计风险
-import HandleManage from '@views/handle-manage/routes'; // 待我处理
-import LinkDataManage from '@views/link-data-manage/routes'; // 联表管理
-import NewSystemManage from '@views/new-system-manage/routes'; // 系统接入
-import NoticeGroup from '@views/notice-group/routes'; // 通知组
-import PlatformManage from '@views/platform-manage/routes'; // 平台管理
-import ApplicationManage from '@views/process-application-manage/routes'; // 处理套餐
-import ProcessedManage from '@views/processed-manage/routes'; // 处理历史
-import RiskManage from '@views/risk-manage/routes'; // 所有风险
-import RuleManage from '@views/rule-manage/routes'; // 处理规则
-import SceneResources from '@views/scene-config/routes'; // 场景配置
-import SceneRiskManage from '@views/scene-risk-manage/routes'; // 场景风险
-import StatementManage from '@views/statement-manage/routes'; // 报表
-import StorageManage from '@views/storage-manage/routes'; // 数据存储
-import StrategyManage from '@views/strategy-manage/routes'; // 审计策略
-import SystemManage from '@views/system-manage/routes'; // 系统列表
-import Tools from '@views/tools/routes'; // 工具广场
 
 import { changeConfirm } from '@utils/assist';
+
+import { getChildRoutes } from './load-routes';
+import { StorageManage } from './routes-static';
 
 
 let lastRouterHrefCache = '/';
@@ -99,33 +83,15 @@ function checkAccessRedirect(
   return null;
 }
 
-export default (config: ConfigModel) => {
+export default async (config: ConfigModel) => {
+  const childRoutes = await getChildRoutes();
   const routes: Array<RouteRecordRaw> = [
     {
       path: '/',
       redirect: {
         name: 'handleManage',
       },
-      children: [
-        AttentionManage,
-        AnalysisManage,
-        SystemManage,
-        StrategyManage,
-        LinkDataManage,
-        EventManage,
-        NoticeGroup,
-        RiskManage,
-        ProcessedManage,
-        HandleManage,
-        ApplicationManage,
-        RuleManage,
-        StatementManage,
-        Tools,
-        NewSystemManage,
-        PlatformManage,
-        SceneResources,
-        SceneRiskManage,
-      ],
+      children: childRoutes,
     },
     {
       path: '/:pathMatch(.*)*',

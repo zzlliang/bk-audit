@@ -14,6 +14,7 @@
   We undertake not to change the open source license (MIT license) applicable
   to the current version of the project delivered to anyone in the future.
 */
+import { createRequire } from 'module';
 import Components from 'unplugin-vue-components/vite';
 import { fileURLToPath, URL } from 'url';
 import { defineConfig } from 'vite';
@@ -25,12 +26,23 @@ import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
 
 
+const require = createRequire(import.meta.url);
+const moduleManifest = require('./packages/build-tools/module-manifest.cjs') as Record<string, { remoteName: string; views: string[] }>;
+
+function getFederationAliases() {
+  return Object.fromEntries(Object.entries(moduleManifest).map(([packageName, config]) => [
+    `${config.remoteName}/routes`,
+    fileURLToPath(new URL(`./packages/modules/${packageName}/src/entry.ts`, import.meta.url)),
+  ]));
+}
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const isDevelopment = mode === 'development';
+  const isRelease = mode === 'release';
 
   return {
-    logLevel: 'error',
+    logLevel: isRelease ? 'error' : 'info',
     base: process.env.AUDIT_VITE_BUILD_BASE_DIR || '/',
     publicDir: 'static',
     plugins: [
@@ -40,15 +52,17 @@ export default defineConfig(({ mode }) => {
         },
       }),
       vueJsx(),
-      basicSsl(),
-      monacoEditorPlugin({}),
+      isDevelopment && basicSsl(),
+      monacoEditorPlugin({
+        languageWorkers: ['editorWorkerService', 'json'],
+      }),
       isDevelopment && VitePluginHtmlEnv({
         prefix: '{{ ',
         suffix: ' }}',
         envPrefixes: 'AUDIT_',
       }),
       Components({
-        dts: true,
+        dts: isDevelopment,
         include: [/src\/components/],
       }),
     ].filter(_ => _),
@@ -67,6 +81,7 @@ export default defineConfig(({ mode }) => {
         '@css': fileURLToPath(new URL('./src/css', import.meta.url)),
         '@language': fileURLToPath(new URL('./src/language', import.meta.url)),
         '@images': fileURLToPath(new URL('./src/images', import.meta.url)),
+        ...getFederationAliases(),
       },
     },
     envPrefix: 'AUDIT_',
@@ -75,5 +90,29 @@ export default defineConfig(({ mode }) => {
       port: 8082,
       strictPort: true,
     },
+    build: isRelease ? {
+      sourcemap: false,
+      reportCompressedSize: false,
+      cssCodeSplit: true,
+      rollupOptions: {
+        maxParallelFileOps: 2,
+        output: {
+          manualChunks(id) {
+            if (id.includes('monaco-editor')) {
+              return 'monaco';
+            }
+            if (id.includes('echarts')) {
+              return 'echarts';
+            }
+            if (id.includes('bkui-vue')) {
+              return 'bkui';
+            }
+            if (id.includes('node_modules')) {
+              return 'vendor';
+            }
+          },
+        },
+      },
+    } : undefined,
   };
 });

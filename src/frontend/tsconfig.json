@@ -3,6 +3,8 @@
   "include": [
     "env.d.ts",
     "components.d.ts",
+    "federation.d.ts",
+    "packages/modules/**/src/**/*",
     "src/**/*",
     "src/**/*.vue"
   ],

@@ -74,13 +74,13 @@ import('@blueking/date-picker/vue3/vue3.css');
 window.changeConfirm = false;
 
 Promise.all([RootManageService.config(), EntryManageService.watermark(), RootManageService.getUserPermission()])
-  .then(([config, data]) => {
+  .then(async ([config, data]) => {
     const BKApp = createApp(App);
     sessionStorage.setItem('BK_AUDIT_CONFIG', JSON.stringify(config));
     BKApp.use(BkuiVue);
     BKApp.use(i18n);
     BKApp.use(JsonViewer);
-    BKApp.use(createRouter(config));
+    BKApp.use(await createRouter(config));
 
     BKApp.component('ApplyPermissionCatch', ApplyPermissionCatch);
     BKApp.component('AuditForm', AuditForm);

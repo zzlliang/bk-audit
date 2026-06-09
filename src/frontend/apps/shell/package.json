@@ -1,0 +1,17 @@
+{
+  "name": "@bk-audit/shell",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "cross-env NODE_ENV=production webpack --config webpack.config.cjs"
+  },
+  "dependencies": {
+    "@bk-audit/module-analysis": "1.0.0",
+    "@bk-audit/module-platform": "1.0.0",
+    "@bk-audit/module-risk": "1.0.0",
+    "@bk-audit/module-scene": "1.0.0",
+    "@bk-audit/module-strategy": "1.0.0",
+    "@bk-audit/module-system": "1.0.0",
+    "@bk-audit/module-tools": "1.0.0"
+  }
+}
