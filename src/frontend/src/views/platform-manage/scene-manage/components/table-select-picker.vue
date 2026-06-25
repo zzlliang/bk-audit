@@ -34,7 +34,7 @@
     :scroll-height="600"
     @clear="handleClearTable"
     @tag-remove="handleRemoveTableTag"
-    @toggle="(val: boolean) => { if (val) tableSearchKey = '' }">
+    @toggle="handleSelectToggle">
     <div
       class="table-select-panel"
       @click.stop>
@@ -144,6 +144,7 @@
     (e: 'update:modelValue', value: string[]): void;
     (e: 'change', value: string[]): void;
     (e: 'loaded'): void;
+    (e: 'toggle', value: boolean): void;
   }
 
   const props = withDefaults(defineProps<Props>(), {
@@ -343,6 +344,13 @@
     activeTableType.value = value;
     tableSearchKey.value = '';
     syncCurrentTreeChecked();
+  };
+
+  const handleSelectToggle = (isOpen: boolean) => {
+    if (isOpen) {
+      tableSearchKey.value = '';
+    }
+    emits('toggle', isOpen);
   };
 
   const handleTableTreeChecked = (nodes: ConfigTypeTableNode[]) => {
@@ -547,6 +555,7 @@
   defineExpose({
     loadData,
     resetState,
+    getSelectedTableNodes: () => selectedTableNodes.value,
   });
 </script>
 
